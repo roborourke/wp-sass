@@ -31,6 +31,8 @@ require_once( 'wp-sass/wp-sass.php' );
 // enqueue a .less style sheet
 if ( ! is_admin() )
     wp_enqueue_style( 'style', get_stylesheet_directory_uri() . '/style.scss' );
+else
+	wp_enqueue_style( 'admin', get_stylesheet_directory_uri() . '/admin.sass.php' );
 
 // you can also use .less files as mce editor style sheets
 add_editor_style( 'editor-style.sass' );
@@ -41,6 +43,18 @@ add_editor_style( 'editor-style.sass' );
 Any registered styles with the .sass or .scss suffix will be compiled and the file URL
 rewritten.
 
+### Using PHP in .sass and .scss files
+
+You can also create `.sass.php` or `.scss.php` files that will be preprocessed in the WordPress context.
+What this means is that you can use WordPress functions within the stylesheets themselves eg:
+
+```sass
+$red: <?php echo get_option( 'redcolour', '#c00' ); ?>;
+
+body {
+  background: $red;
+}
+```
 
 ## Further Reading
 

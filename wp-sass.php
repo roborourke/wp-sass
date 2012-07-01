@@ -106,7 +106,16 @@ class wp_sass {
 
 			// parse if we need to
 			if ( empty( $full_cache[ 'css' ] ) || filemtime( $sass_path ) > $full_cache[ 'updated' ] || $full_cache[ 'root' ] != __FILE__ ) {
-				$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax );
+				// preprocess php files in WP context
+				if ( strstr( $sass_path, '.php' ) ) {
+					ob_start();
+					include( $sass_path );
+					$sass = ob_get_clean();
+					file_put_contents( "{$cache_path}.preprocessed", $sass );
+					$full_cache[ 'css' ] = $this->__parse( "{$cache_path}.preprocessed", $syntax );
+				} else {
+					$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax );
+				}
 				file_put_contents( $cache_path, serialize( $full_cache ) );
 				file_put_contents( $css_path, $full_cache[ 'css' ] );
 			}
@@ -119,31 +128,31 @@ class wp_sass {
 	}
 	
 	public function __parse( $file, $syntax, $style = 'nested' ) {
-      $options = array(
-        'style' => $style,
-        'cache' => FALSE,
-        'syntax' => $syntax,
-        'debug' => FALSE,
-        'callbacks' => array(
-          'warn' => array( $this, 'cb_warn' ),
-          'debug' => array( $this, 'cb_debug' ),
-        ),
-      );
-      // Execute the compiler.
-      $parser = new SassParser( $options );
-      return $parser->toCss( $file );
+		$options = array(
+			'style' => $style,
+			'cache' => FALSE,
+			'syntax' => $syntax,
+			'debug' => FALSE,
+			'callbacks' => array(
+				'warn' => array( $this, 'cb_warn' ),
+				'debug' => array( $this, 'cb_debug' ),
+			),
+		);
+		// Execute the compiler.
+		$parser = new SassParser( $options );
+		return $parser->toCss( $file );
     }
 	
-	public function cb_warn($message, $context) {
-      print "<p class='warn'>WARN : ";
-      print_r($message);
-      print "</p>";
+	public function cb_warn( $message, $context ) {
+		print "<p class='warn'>WARN : ";
+		print_r( $message );
+		print "</p>";
     }
 	
-    public function cb_debug($message) {
-      print "<p class='debug'>DEBUG : ";
-      print_r($message);
-      print "</p>";
+    public function cb_debug( $message ) {
+		print "<p class='debug'>DEBUG : ";
+		print_r( $message );
+		print "</p>";
     }
 
 

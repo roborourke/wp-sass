@@ -102,10 +102,10 @@ class wp_sass {
 
 			// If the root path in the cache is wrong then regenerate
 			if ( ! isset( $full_cache ) )
-				$full_cache = array( 'root' => __FILE__, 'path' => $sass_path, 'css' => '', 'updated' => filemtime( $sass_path ) );
+				$full_cache = array( 'root' =>  dirname( __FILE__ ), 'path' => $sass_path, 'css' => '', 'updated' => filemtime( $sass_path ) );
 
 			// parse if we need to
-			if ( empty( $full_cache[ 'css' ] ) || filemtime( $sass_path ) > $full_cache[ 'updated' ] || $full_cache[ 'root' ] != __FILE__ ) {
+			if ( empty( $full_cache[ 'css' ] ) || filemtime( $sass_path ) > $full_cache[ 'updated' ] || $full_cache[ 'root' ] != dirname( __FILE__ ) ) {
 				// preprocess php files in WP context
 				if ( strstr( $sass_path, '.php' ) ) {
 					ob_start();

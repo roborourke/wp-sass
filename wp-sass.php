@@ -102,16 +102,23 @@ class wp_sass {
 
 			// If the root path in the cache is wrong then regenerate
 			if ( ! isset( $full_cache ) )
-				$full_cache = array( 'root' =>  dirname( __FILE__ ), 'path' => $sass_path, 'css' => '', 'updated' => filemtime( $sass_path ) );
+				$full_cache = array( 'root' => dirname( __FILE__ ), 'path' => $sass_path, 'css' => '', 'updated' => filemtime( $sass_path ) );
 
+			// check output after php has run for changes. Options are preloaded by default so the database hit shouldn't be too bad for most uses
+			if ( strstr( $sass_path, '.php' ) ) {
+				ob_start();
+				include( $sass_path );
+				$sass = ob_get_clean();
+				if ( file_exists( "{$cache_path}.preprocessed.{$syntax}" ) && $sass != file_get_contents( "{$cache_path}.preprocessed.{$syntax}" ) ) {
+					$full_cache[ 'css' ] = '';
+					file_put_contents( "{$cache_path}.preprocessed.{$syntax}", $sass );
+				}
+			}
+				
 			// parse if we need to
 			if ( empty( $full_cache[ 'css' ] ) || filemtime( $sass_path ) > $full_cache[ 'updated' ] || $full_cache[ 'root' ] != dirname( __FILE__ ) ) {
 				// preprocess php files in WP context
 				if ( strstr( $sass_path, '.php' ) ) {
-					ob_start();
-					include( $sass_path );
-					$sass = ob_get_clean();
-					file_put_contents( "{$cache_path}.preprocessed.{$syntax}", $sass );
 					$full_cache[ 'css' ] = $this->__parse( "{$cache_path}.preprocessed.{$syntax}", $syntax );
 				} else {
 					$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax );

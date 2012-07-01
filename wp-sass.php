@@ -4,7 +4,7 @@ Plugin Name: SASS CSS Auto Compiler
 Plugin URI: https://github.com/sanchothefat/wp-sass/
 Description: Allows you to enqueue .sass files and have them automatically compiled whenever a change is detected.
 Author: Robert O'Rourke
-Version: 1.1
+Version: 0.1
 Author URI: http://interconnectit.com
 License: MIT
 */
@@ -80,7 +80,7 @@ class wp_sass {
 	public function parse_stylesheet( $src, $handle ) {
 
 		// we only want to handle .less files
-		if ( ! preg_match( "/\.sass(\.php)?$/", preg_replace( "/\?.*$/", "", $src ) ) )
+		if ( ! preg_match( "/(\.sass|\.scss)(\.php)?$/", preg_replace( "/\?.*$/", "", $src ) ) )
 			return $src;
 
 		// get file path from $src
@@ -91,6 +91,7 @@ class wp_sass {
 		// output css file name
 		$css_path = trailingslashit( $this->get_cache_dir() ) . "{$handle}.css";
 
+		$syntax = strstr( $sass_path, 'scss' ) ? 'scss' : 'sass';
 
 		// automatically regenerate files if source's modified time has changed or vars have changed
 		try {
@@ -101,11 +102,11 @@ class wp_sass {
 
 			// If the root path in the cache is wrong then regenerate
 			if ( ! isset( $full_cache ) )
-				$full_cache = array( 'root' => __FILE__, 'sass' => $sass_path, 'css' => '', 'updated' => filemtime( $sass_path ) );
+				$full_cache = array( 'root' => __FILE__, 'path' => $sass_path, 'css' => '', 'updated' => filemtime( $sass_path ) );
 
 			// parse if we need to
 			if ( empty( $full_cache[ 'css' ] ) || filemtime( $sass_path ) > $full_cache[ 'updated' ] || $full_cache[ 'root' ] != __FILE__ ) {
-				$full_cache[ 'css' ] = $this->parse( $sass_path );
+				$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax );
 				file_put_contents( $cache_path, serialize( $full_cache ) );
 				file_put_contents( $css_path, $full_cache[ 'css' ] );
 			}
@@ -117,7 +118,7 @@ class wp_sass {
 		return trailingslashit( $this->get_cache_dir( false ) ) . "{$handle}.css" . ( ! empty( $query_string ) ? "?{$query_string}" : '' );
 	}
 	
-	function __parse( $file, $syntax, $style = 'nested' ) {
+	public function __parse( $file, $syntax, $style = 'nested' ) {
       $options = array(
         'style' => $style,
         'cache' => FALSE,
@@ -133,13 +134,13 @@ class wp_sass {
       return $parser->toCss( $file );
     }
 	
-	function cb_warn($message, $context) {
+	public function cb_warn($message, $context) {
       print "<p class='warn'>WARN : ";
       print_r($message);
       print "</p>";
     }
 	
-    function cb_debug($message) {
+    public function cb_debug($message) {
       print "<p class='debug'>DEBUG : ";
       print_r($message);
       print "</p>";

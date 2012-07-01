@@ -10,10 +10,10 @@ before deploying them.
 If you are using git to clone the repository do the following:
 
     git clone git://github.com/sanchothefat/wp-sass.git wp-sass
-    git submodule update --init
+    git submodule update --init --recursive
 
-If you are downloading the zip or tar don't forget to download the lessphp
-dependency too https://github.com/leafo/lessphp and copy it into the `lessc`
+If you are downloading the zip or tar don't forget to download the phpsass
+dependency too https://github.com/richthegeek/phpsass and copy it into the `phpsass`
 folder.
 
 ## Usage:

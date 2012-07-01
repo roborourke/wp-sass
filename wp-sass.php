@@ -13,7 +13,7 @@ License: MIT
 ! defined( 'ABSPATH' ) AND exit;
 
 
-// load LESS parser
+// load SASS parser
 ! class_exists( 'SassParser' ) AND require_once( 'phpsass/SassParser.php' );
 
 
@@ -70,9 +70,9 @@ class wp_sass {
 
 
 	/**
-	 * Lessify the stylesheet and return the href of the compiled file
+	 * Sassify the stylesheet and return the href of the compiled file
 	 *
-	 * @param String $src	Source URL of the file to be parsed
+	 * @param String $src		Source URL of the file to be parsed
 	 * @param String $handle	An identifier for the file used to create the file name in the cache
 	 *
 	 * @return String    URL of the compiled stylesheet
@@ -111,8 +111,8 @@ class wp_sass {
 					ob_start();
 					include( $sass_path );
 					$sass = ob_get_clean();
-					file_put_contents( "{$cache_path}.preprocessed", $sass );
-					$full_cache[ 'css' ] = $this->__parse( "{$cache_path}.preprocessed", $syntax );
+					file_put_contents( "{$cache_path}.preprocessed.{$syntax}", $sass );
+					$full_cache[ 'css' ] = $this->__parse( "{$cache_path}.preprocessed.{$syntax}", $syntax );
 				} else {
 					$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax );
 				}
@@ -171,7 +171,7 @@ class wp_sass {
 		if ( count( $style_sheets ) ) {
 			$compiled_css = array();
 
-			// loop through editor styles, any .less files will be compiled and the compiled URL returned
+			// loop through editor styles, any .sass or .scss files will be compiled and the compiled URL returned
 			foreach( $style_sheets as $style_sheet )
 				$compiled_css[] = $this->parse_stylesheet( $style_sheet, $this->url_to_handle( $style_sheet ) );
 
@@ -188,7 +188,7 @@ class wp_sass {
 	 *
 	 * @param String $url 	File URL to generate a handle from
 	 *
-	 * @return String    Sanitised string to use for handle
+	 * @return String    	Sanitised string to use for handle
 	 */
 	public function url_to_handle( $url ) {
 

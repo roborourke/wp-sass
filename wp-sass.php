@@ -13,7 +13,7 @@ License: MIT
 ! defined( 'ABSPATH' ) AND exit;
 
 
-// load LESS parser
+// load SASS parser
 ! class_exists( 'SassParser' ) AND require_once( 'phpsass/SassParser.php' );
 
 
@@ -70,16 +70,16 @@ class wp_sass {
 
 
 	/**
-	 * Lessify the stylesheet and return the href of the compiled file
+	 * Sassify the stylesheet and return the href of the compiled file
 	 *
-	 * @param String $src	Source URL of the file to be parsed
+	 * @param String $src		Source URL of the file to be parsed
 	 * @param String $handle	An identifier for the file used to create the file name in the cache
 	 *
 	 * @return String    URL of the compiled stylesheet
 	 */
 	public function parse_stylesheet( $src, $handle ) {
 
-		// we only want to handle .less files
+		// we only want to handle .sass or .scss files
 		if ( ! preg_match( "/(\.sass|\.scss)(\.php)?$/", preg_replace( "/\?.*$/", "", $src ) ) )
 			return $src;
 
@@ -119,32 +119,32 @@ class wp_sass {
 	}
 	
 	public function __parse( $file, $syntax, $style = 'nested' ) {
-      $options = array(
-        'style' => $style,
-        'cache' => FALSE,
-        'syntax' => $syntax,
-        'debug' => FALSE,
-        'callbacks' => array(
-          'warn' => array( $this, 'cb_warn' ),
-          'debug' => array( $this, 'cb_debug' ),
-        ),
-      );
-      // Execute the compiler.
-      $parser = new SassParser( $options );
-      return $parser->toCss( $file );
+		$options = array(
+		'style' => $style,
+		'cache' => FALSE,
+		'syntax' => $syntax,
+		'debug' => FALSE,
+		'callbacks' => array(
+		'warn' => array( $this, 'cb_warn' ),
+		'debug' => array( $this, 'cb_debug' ),
+		),
+	);
+	// Execute the compiler.
+	$parser = new SassParser( $options );
+	return $parser->toCss( $file );
     }
 	
 	public function cb_warn($message, $context) {
-      print "<p class='warn'>WARN : ";
-      print_r($message);
-      print "</p>";
-    }
+		print "<p class='warn'>WARN : ";
+		print_r($message);
+		print "</p>";
+	}
 	
-    public function cb_debug($message) {
-      print "<p class='debug'>DEBUG : ";
-      print_r($message);
-      print "</p>";
-    }
+	public function cb_debug($message) {
+		print "<p class='debug'>DEBUG : ";
+		print_r($message);
+		print "</p>";
+	}
 
 
 	/**
@@ -162,7 +162,7 @@ class wp_sass {
 		if ( count( $style_sheets ) ) {
 			$compiled_css = array();
 
-			// loop through editor styles, any .less files will be compiled and the compiled URL returned
+			// loop through editor styles, any .sass or .scss files will be compiled and the compiled URL returned
 			foreach( $style_sheets as $style_sheet )
 				$compiled_css[] = $this->parse_stylesheet( $style_sheet, $this->url_to_handle( $style_sheet ) );
 
@@ -179,7 +179,7 @@ class wp_sass {
 	 *
 	 * @param String $url 	File URL to generate a handle from
 	 *
-	 * @return String    Sanitised string to use for handle
+	 * @return String    	Sanitised string to use for handle
 	 */
 	public function url_to_handle( $url ) {
 

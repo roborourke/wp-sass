@@ -1,10 +1,10 @@
 <?php
 /**
-Plugin Name: SASS CSS Auto Compiler
+Plugin Name: WP Sass
 Plugin URI: https://github.com/sanchothefat/wp-sass/
 Description: Allows you to enqueue .sass files and have them automatically compiled whenever a change is detected.
 Author: Robert O'Rourke
-Version: 0.1
+Version: 0.2
 Author URI: http://interconnectit.com
 License: MIT
 */
@@ -80,7 +80,7 @@ class wp_sass {
 	public function parse_stylesheet( $src, $handle ) {
 
 		// we only want to handle .less files
-		if ( ! preg_match( "/(\.sass|\.scss)(\.php)?$/", preg_replace( "/\?.*$/", "", $src ) ) )
+		if ( ! preg_match( "/\.(?:sass|scss)(\.php)?$/", preg_replace( "/\?.*$/", "", $src ) ) )
 			return $src;
 
 		// get file path from $src
@@ -109,7 +109,7 @@ class wp_sass {
 				ob_start();
 				include( $sass_path );
 				$sass = ob_get_clean();
-				if ( file_exists( "{$cache_path}.preprocessed.{$syntax}" ) && $sass != file_get_contents( "{$cache_path}.preprocessed.{$syntax}" ) ) {
+				if ( ! file_exists( "{$cache_path}.preprocessed.{$syntax}" ) || ( file_exists( "{$cache_path}.preprocessed.{$syntax}" ) && $sass != file_get_contents( "{$cache_path}.preprocessed.{$syntax}" ) ) ) {
 					$full_cache[ 'css' ] = '';
 					file_put_contents( "{$cache_path}.preprocessed.{$syntax}", $sass );
 				}

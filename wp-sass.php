@@ -123,6 +123,8 @@ class wp_sass {
 				} else {
 					$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax );
 				}
+				// update cache creation time
+				$full_cache[ 'updated' ] = filemtime( $sass_path );
 				file_put_contents( $cache_path, serialize( $full_cache ) );
 				file_put_contents( $css_path, $full_cache[ 'css' ] );
 			}

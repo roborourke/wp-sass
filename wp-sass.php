@@ -146,23 +146,66 @@ class wp_sass {
 				'warn' => array( $this, 'cb_warn' ),
 				'debug' => array( $this, 'cb_debug' ),
 			),
+			'load_path_functions' => array( array( $this, 'loadCallback' )),
+			'load_paths' => array(dirname($file)),
+			'functions' => $this->getFunctions(array('Compass')),
+			'extensions' => array('Compass'),
 		);
-		// Execute the compiler.
-		$parser = new SassParser( $options );
-		return $parser->toCss( $file );
-    }
+		try{
+			// Execute the compiler.
+			$parser = new SassParser( $options );
+			return $parser->toCss( $file );
+		} catch (Exception $ex) {
+			wp_die( $ex->getMessage() );
+		}
+	}
 	
 	public function cb_warn( $message, $context ) {
 		print "<p class='warn'>WARN : ";
 		print_r( $message );
 		print "</p>";
-    }
+	}
 	
-    public function cb_debug( $message ) {
+	public function cb_debug( $message ) {
 		print "<p class='debug'>DEBUG : ";
 		print_r( $message );
 		print "</p>";
-    }
+	}
+
+	public function getFunctions($extensions) {
+		$extensions = array('Compass');
+		$output = array();
+		if (!empty($extensions)) {
+			foreach ($extensions as $extension) {
+				$name = explode('/', $extension, 2);
+				$namespace = ucwords(preg_replace('/[^0-9a-z]+/', '_', strtolower(array_shift($name))));
+				$extensionPath = dirname(__FILE__) . '/phpsass/Extensions/' . $namespace . '/' . $namespace . '.php';
+				if ( file_exists($extensionPath) ) {
+					require_once($extensionPath);
+					$namespace = $namespace . '::';
+					$function = 'getFunctions';
+					$output = array_merge($output, call_user_func($namespace . $function, $namespace));
+				}
+			}
+		}
+		return $output;
+	}
+	public function loadCallback($file, $parser) {
+		$paths = array();
+		foreach ($parser->extensions as $extensionName) {
+			$namespace = ucwords(preg_replace('/[^0-9a-z]+/', '_', strtolower($extensionName)));
+			$extensionPath = dirname(__FILE__) . '/phpsass/Extensions/' . $namespace . '/' . $namespace . '.php';
+			if (file_exists($extensionPath)) {
+				require_once($extensionPath);
+				$hook = $namespace . '::resolveExtensionPath';
+				$returnPath = call_user_func($hook, $file, $parser);
+				if (!empty($returnPath)) {
+						$paths[] = $returnPath;
+				}
+			}
+		}
+		return $paths;
+	}
 
 
 	/**

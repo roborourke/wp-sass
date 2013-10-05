@@ -114,14 +114,14 @@ class wp_sass {
 					file_put_contents( "{$cache_path}.preprocessed.{$syntax}", $sass );
 				}
 			}
-				
+
 			// parse if we need to
 			if ( empty( $full_cache[ 'css' ] ) || filemtime( $sass_path ) > $full_cache[ 'updated' ] || $full_cache[ 'root' ] != dirname( __FILE__ ) ) {
 				// preprocess php files in WP context
 				if ( strstr( $sass_path, '.php' ) ) {
-					$full_cache[ 'css' ] = $this->__parse( "{$cache_path}.preprocessed.{$syntax}", $syntax );
+					$full_cache[ 'css' ] = $this->__parse( "{$cache_path}.preprocessed.{$syntax}", $syntax, "nested", array( dirname( $sass_path ) ) );
 				} else {
-					$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax );
+					$full_cache[ 'css' ] = $this->__parse( $sass_path, $syntax, "nested", array( dirname( $sass_path ) ) );
 				}
 				// update cache creation time
 				$full_cache[ 'updated' ] = filemtime( $sass_path );
@@ -135,8 +135,8 @@ class wp_sass {
 		// return the compiled stylesheet with the query string it had if any
 		return trailingslashit( $this->get_cache_dir( false ) ) . "{$handle}.css" . ( ! empty( $query_string ) ? "?{$query_string}" : '' );
 	}
-	
-	public function __parse( $file, $syntax, $style = 'nested' ) {
+
+	public function __parse( $file, $syntax, $style = 'nested', $load_path = array() ) {
 		$options = array(
 			'style' => $style,
 			'cache' => FALSE,
@@ -146,18 +146,19 @@ class wp_sass {
 				'warn' => array( $this, 'cb_warn' ),
 				'debug' => array( $this, 'cb_debug' ),
 			),
+			'load_paths' => $load_path,
 		);
 		// Execute the compiler.
 		$parser = new SassParser( $options );
 		return $parser->toCss( $file );
     }
-	
+
 	public function cb_warn( $message, $context ) {
 		print "<p class='warn'>WARN : ";
 		print_r( $message );
 		print "</p>";
     }
-	
+
     public function cb_debug( $message ) {
 		print "<p class='debug'>DEBUG : ";
 		print_r( $message );

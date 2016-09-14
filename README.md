@@ -28,13 +28,13 @@ For use with themes add the following lines to your functions.php:
 // Include the class (unless you are using the script as a plugin)
 require_once( 'wp-sass/wp-sass.php' );
 
-// enqueue a .less style sheet
+// enqueue a .scss style sheet
 if ( ! is_admin() )
     wp_enqueue_style( 'style', get_stylesheet_directory_uri() . '/style.scss' );
 else
 	wp_enqueue_style( 'admin', get_stylesheet_directory_uri() . '/admin.sass.php' );
 
-// you can also use .less files as mce editor style sheets
+// you can also use .scss files as mce editor style sheets
 add_editor_style( 'editor-style.sass' );
 
 ?>
